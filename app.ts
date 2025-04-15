@@ -1,14 +1,25 @@
-const express = require('express')
-const session = require('express-session')
-const SQLiteStore = require('connect-sqlite3')(session)
-const cors = require('cors')
-const cookieParser = require('cookie-parser')
-const sessionMiddleware = require('./middlewares/sessionsMiddleware.ts')
-const adminMiddleware = require('./middlewares/adminMiddleware.ts')
-const authController = require('./controllers/authController.ts')
-const postsController = require('./controllers/postsController.ts')
+// const express = require('express')
+// const session = require('express-session')
+// const SQLiteStore = require('connect-sqlite3')(session)
+// const cors = require('cors')
+// const cookieParser = require('cookie-parser')
+// const sessionMiddleware = require('./middlewares/sessionsMiddleware.ts')
+// const adminMiddleware = require('./middlewares/adminMiddleware.ts')
+// const authController = require('./controllers/authController.ts')
+// const postsController = require('./controllers/postsController.ts')
 
-const app = express()
+import { sessionMiddleware } from 'middlewares/sessionsMiddleware'
+import session from 'express-session';
+import connectSqlite3 from 'connect-sqlite3';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import express from 'express'
+import { login, userData } from 'controllers/authController';
+import { addPost, deletePost, getAllPosts } from 'controllers/postsController';
+import { adminMiddleware } from 'middlewares/adminMiddleware';
+
+
+export const app = express()
 
 app.use(express.json())
 app.use(cookieParser())
@@ -25,7 +36,7 @@ app.use(
   // secure: true,
   // sameSite: 'None',
   session({
-    store: new SQLiteStore({ db: 'database.db', dir: './' }),
+    store: new connectSqlite3(session)({ db: 'database.db', dir: './' }),
     secret: 'supersecretkey',
     resave: false,
     saveUninitialized: false,
@@ -40,11 +51,12 @@ app.use(
 
 app.use(sessionMiddleware)
 
-app.post('/login', authController.login);
-app.get('/check-admin', authController.checkAdmin);
+app.post('/login', login);
+app.get('/user-data', userData);
 
-app.get('/posts', postsController.getAllPosts);
-app.post('/posts', adminMiddleware, postsController.addPost);
-app.delete('/posts/:id', adminMiddleware, postsController.deletePost);
+app.get('/posts', getAllPosts);
+app.post('/posts', adminMiddleware, addPost);
+app.delete('/posts/:id', adminMiddleware, deletePost);
 
-module.exports = app
+// module.exports = app
+

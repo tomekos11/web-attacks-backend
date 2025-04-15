@@ -1,14 +1,38 @@
-const WebSocket = require('ws');
+// const WebSocket = require('ws');
+import { WebSocket, WebSocketServer } from 'ws';
+import type { Server } from 'http';
 
-// Funkcja inicjalizująca WebSocket
-const setupWebSocket = (server) => {
-  // Inicjalizacja serwera WebSocket
-  const wss = new WebSocket.Server({ server });
+class WebSocketManager {
 
-  // Funkcja do broadcastowania nowych postów
-  const broadcastNewPost = (post) => {
-    // Wysyłanie wiadomości do wszystkich połączonych klientów
-    wss.clients.forEach((client) => {
+  private wss: WebSocketServer | null = null;
+
+  constructor() {
+    this.wss = null;
+  }
+
+  init(server: Server) {
+    this.wss = new WebSocketServer({ server });
+
+    this.wss.on('connection', (ws) => {
+      ws.on('message', (message) => {
+        this.wss.clients.forEach((client) => {
+          if (client !== ws && client.readyState === WebSocket.OPEN) {
+            client.send(message);
+          }
+        });
+      });
+    });
+
+    console.log('WebSocket został uruchomiony!');
+  }
+
+  broadcastNewPost(post) {
+    if (!this.wss) {
+      console.warn('WebSocket nie został jeszcze zainicjalizowany!');
+      return;
+    }
+
+    this.wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(
           JSON.stringify({
@@ -19,29 +43,9 @@ const setupWebSocket = (server) => {
         );
       }
     });
-  };
+  }
+}
 
-  // Obsługa połączenia z WebSocket
-  wss.on('connection', (ws) => {
+// module.exports = new WebSocketManager();
 
-    // Nasłuch na wiadomości z klienta
-    ws.on('message', (message) => {
-
-      // Emitowanie wiadomości do wszystkich połączonych klientów
-      wss.clients.forEach((client) => {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(message);
-        }
-      });
-    });
-    
-  });
-
-  console.log('WebSocket został uruchomiony!');
-
-  // Zwróć wss oraz broadcastNewPost
-  return { wss, broadcastNewPost };
-};
-
-// Eksportowanie funkcji
-module.exports = { setupWebSocket };
+export const webSocketManager = new WebSocketManager();

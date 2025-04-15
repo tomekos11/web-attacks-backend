@@ -1,9 +1,12 @@
-// const https = require('https')
-const http = require('http')
-const app = require('./app.ts')
-const { setupWebSocket } = require('./services/webSocketManager.ts')
-const initDb = require('./config/db.ts')
-const fs = require('fs')
+import { initDb } from "./config/db.js"
+import { webSocketManager } from "./services/webSocketManager.js"
+import http from 'http'
+import { app } from './app.js'
+// import fs from 'fs'
+
+// const http = require('http')
+// const app = require('./app.ts')
+// const fs = require('fs')
 
 // const server = https.createServer({
 //     key: fs.readFileSync('./cert/key.pem'),
@@ -23,7 +26,7 @@ const start = async () => {
     console.log('Serwer działa na http://localhost:5000')
   })
 
-  setupWebSocket(server)
+  webSocketManager.init(server);
 }
 
 start()

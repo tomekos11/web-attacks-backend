@@ -1,5 +1,8 @@
-const crypto = require('crypto')
-const dbService = require('../services/dbService.ts') // Zmieniamy na dbService
+// const crypto = require('crypto')
+// const dbService = require('../services/dbService.ts')
+
+import crypto from 'crypto'
+import { dbService } from '../services/dbService.js'
 
 // 🛠 Generowanie losowego imienia
 function generateRandomName() {
@@ -11,11 +14,10 @@ function generateRandomInteger() {
   return Math.floor(Math.random() * 6) + 1
 }
 
-const sessionMiddleware = async (req, res, next) => {
+export const sessionMiddleware = async (req, res, next) => {
   const { session } = req;
 
   if (session.userId) {
-    console.log('istniejacy user (z sesji)');
     return next();
   }
 
@@ -32,10 +34,8 @@ const sessionMiddleware = async (req, res, next) => {
     }
   }
 
-  console.log('sesja');
-
   if (req.session.userId) {
-    console.log('istniejacy user');
+    console.log('pobieram cos z bazy');
 
     // Pobierz użytkownika z bazy danych przy użyciu dbService
     const user = await dbService.get('SELECT * FROM users WHERE id = ?', [req.session.userId]);
@@ -58,4 +58,4 @@ const sessionMiddleware = async (req, res, next) => {
   return next();
 };
 
-module.exports = sessionMiddleware
+// module.exports = sessionMiddleware

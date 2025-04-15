@@ -1,23 +1,27 @@
-const dbService = require('../services/dbService.ts') // Importujemy dbService
+// const dbService = require('./dbService.ts')
+import { dbService } from './dbService.js';
 
 const getAllPosts = async () => {
-  // Zwrócenie wszystkich postów z bazy danych
-  const db = await dbService // Otrzymujemy dostęp do bazy danych
+  const db = await dbService
   return db.all('SELECT * FROM posts ORDER BY createdAt DESC')
 }
 
 const createPost = async (userId, userName, userNumber, title, content) => {
   const createdAt = new Date().toISOString()
 
-  const db = await dbService // Otrzymujemy dostęp do bazy danych
+  const db = await dbService
 
   const result = await db.run(
     'INSERT INTO posts (userId, userName, userNumber, title, content, createdAt) VALUES (?, ?, ?, ?, ?, ?)',
     [userId, userName, userNumber, title, content, createdAt],
   )
 
+  console.log(result)
+
+  const postId = result.lastID;
+
   return {
-    id: result.lastID,
+    id: postId,
     title,
     content,
     userName,
@@ -27,7 +31,7 @@ const createPost = async (userId, userName, userNumber, title, content) => {
 }
 
 const deletePost = async (id) => {
-  const db = await dbService // Otrzymujemy dostęp do bazy danych
+  const db = await dbService
 
   const post = await db.get('SELECT * FROM posts WHERE id = ?', [id])
   if (!post) return false
@@ -36,8 +40,14 @@ const deletePost = async (id) => {
   return true
 }
 
-module.exports = {
+// module.exports = {
+//   getAllPosts,
+//   createPost,
+//   deletePost,
+// }
+
+export const postService = {
   getAllPosts,
   createPost,
-  deletePost,
+  deletePost
 }

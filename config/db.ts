@@ -1,14 +1,18 @@
-const sqlite3 = require('sqlite3');
-const { open } = require('sqlite');
-const bcrypt = require('bcryptjs');
+// const sqlite3 = require('sqlite3');
+// const { open } = require('sqlite');
+// const bcrypt = require('bcryptjs');
+
+import sqlite3 from 'sqlite3'
+import { open } from 'sqlite'
+import bcrypt from 'bcryptjs'
 
 let db;
 
-const initDb = async () => {
-  if (db) return db; // Jeśli już zainicjowano, zwróć istniejącą instancję
+export const initDb = async () => {
+  if (db) return db;
 
   db = await open({
-    filename: './database.db',  // Upewnij się, że ścieżka jest prawidłowa
+    filename: './database.db',
     driver: sqlite3.Database,
   });
 
@@ -37,10 +41,9 @@ const initDb = async () => {
     role TEXT NOT NULL
   )`);
 
-  // Dodaj admina, jeśli go nie ma
   const existingAdmin = await db.get('SELECT * FROM users WHERE username = ?', ['admin']);
   if (!existingAdmin) {
-    const hashedPassword = await bcrypt.hash('adminpassword', 10);
+    const hashedPassword = await bcrypt.hash('password', 10);
     await db.run('INSERT INTO users (username, password, role, userNumber) VALUES (?, ?, ?, ?)', [
       'admin',
       hashedPassword,
@@ -52,5 +55,4 @@ const initDb = async () => {
   return db;
 };
 
-// Eksportowanie funkcji initDb za pomocą CommonJS
-module.exports = initDb;
+// module.exports = initDb;

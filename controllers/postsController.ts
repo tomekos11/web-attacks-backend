@@ -1,16 +1,20 @@
-const postService = require('../services/postService.ts')
-const WebSocketManager = require('../services/webSocketManager.ts')
+// const postService = require('../services/postService.ts')
+// const webSocketManager = require('../services/webSocketManager.ts')
 
-const getAllPosts = async (req, res) => {
+import { postService } from "services/postService.js"
+import { webSocketManager } from "services/webSocketManager.js"
+
+export const getAllPosts = async (req, res) => {
   try {
     const posts = await postService.getAllPosts()
+
     res.json(posts)
   } catch (err) {
     res.status(500).json({ error: 'Błąd pobierania postów' })
   }
 }
 
-const addPost = async (req, res) => {
+export const addPost = async (req, res) => {
   if (!req.session.userId) {
     return res.status(403).json({ error: 'Brak sesji użytkownika' })
   }
@@ -29,7 +33,7 @@ const addPost = async (req, res) => {
       content,
     )
 
-    WebSocketManager.broadcastNewPost(newPost)
+    webSocketManager.broadcastNewPost(newPost);
 
     res.json({ message: 'Post dodany!' })
   } catch (err) {
@@ -37,7 +41,7 @@ const addPost = async (req, res) => {
   }
 }
 
-const deletePost = async (req, res) => {
+export const deletePost = async (req, res) => {
   const { id } = req.params
 
   try {
@@ -52,8 +56,8 @@ const deletePost = async (req, res) => {
   }
 }
 
-module.exports = {
-  getAllPosts,
-  addPost,
-  deletePost,
-}
+// module.exports = {
+//   getAllPosts,
+//   addPost,
+//   deletePost,
+// }

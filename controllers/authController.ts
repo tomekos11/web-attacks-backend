@@ -1,7 +1,10 @@
-const bcrypt = require('bcryptjs')
-const userService = require('../services/userService.ts')
+// const bcrypt = require('bcryptjs')
+// const userService = require('../services/userService.ts')
 
-const login = async (req, res) => {
+import bcrypt from 'bcryptjs'
+import { userService } from 'services/userService.js';
+
+export const login = async (req, res) => {
   const { username, password } = req.body;
 
   try {
@@ -35,11 +38,16 @@ const login = async (req, res) => {
   }
 };
 
-const checkAdmin = (req, res) => {
-  res.status(200).json({ message: req.session.isAdmin })
+export const userData = (req, res) => {
+  res.status(200).json({ 
+    username: req.session.username,
+    userNumber: req.session.userNumber,
+    isAdmin: req.session.isAdmin
+  })
 }
 
-module.exports = {
-  login,
-  checkAdmin,
-}
+// module.exports = {
+//   login,
+//   userData,
+// }
+

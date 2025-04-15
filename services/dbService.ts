@@ -1,5 +1,8 @@
-const sqlite3 = require('sqlite3')
-const { open } = require('sqlite')
+// const sqlite3 = require('sqlite3')
+// const { open } = require('sqlite')
+
+import sqlite3 from "sqlite3"
+import { open } from "sqlite"
 
 class DBService {
   constructor() {
@@ -51,4 +54,6 @@ class DBService {
   }
 }
 
-module.exports = new DBService()
+// module.exports = new DBService()
+
+export const dbService = new DBService();

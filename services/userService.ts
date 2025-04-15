@@ -1,6 +1,9 @@
 // services/userService.ts
-const bcrypt = require('bcryptjs')
-const db = require('./dbService.ts') // Upewnij się, że importujesz odpowiednią instancję bazy danych
+// const bcrypt = require('bcryptjs')
+// const db = require('./dbService.ts') // Upewnij się, że importujesz odpowiednią instancję bazy danych
+
+import bcrypt from 'bcryptjs'
+import { dbService } from './dbService'
 
 class UserService {
   // Rejestracja nowego użytkownika
@@ -13,7 +16,7 @@ class UserService {
     const hashedPassword = await bcrypt.hash(password, 10)
 
     // Dodanie nowego użytkownika
-    await db.run('INSERT INTO users (username, password, role, userNumber) VALUES (?, ?, ?, ?)', [
+    await dbService.run('INSERT INTO users (username, password, role, userNumber) VALUES (?, ?, ?, ?)', [
       username,
       hashedPassword,
       'user', // Domyślna rola to 'user'
@@ -23,7 +26,7 @@ class UserService {
 
   // Logowanie użytkownika
   static async login(username, password) {
-    const user = await db.get('SELECT * FROM users WHERE username = ?', [username])
+    const user = await dbService.get('SELECT * FROM users WHERE username = ?', [username])
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new Error('Nieprawidłowe dane logowania')
@@ -34,7 +37,7 @@ class UserService {
 
   // Pobranie użytkownika po ID
   static async getUserById(userId) {
-    const user = await db.get('SELECT * FROM users WHERE id = ?', [userId])
+    const user = await dbService.get('SELECT * FROM users WHERE id = ?', [userId])
     if (!user) {
       throw new Error('Użytkownik nie istnieje')
     }
@@ -44,7 +47,7 @@ class UserService {
 
   // Pobranie użytkownika po username
   static async getUserByUsername(username) {
-    const user = await db.get('SELECT * FROM users WHERE username = ?', [username])
+    const user = await dbService.get('SELECT * FROM users WHERE username = ?', [username])
     if (!user) {
       throw new Error('Użytkownik o tym username nie istnieje')
     }
@@ -54,7 +57,7 @@ class UserService {
 
   // Sprawdzenie, czy użytkownik ma rolę administratora
   static async isAdmin(userId) {
-    const user = await db.get('SELECT * FROM users WHERE id = ?', [userId])
+    const user = await dbService.get('SELECT * FROM users WHERE id = ?', [userId])
     if (!user) {
       throw new Error('Użytkownik nie istnieje')
     }
@@ -63,4 +66,6 @@ class UserService {
   }
 }
 
-module.exports = UserService
+// module.exports = UserService
+
+export const userService = UserService
