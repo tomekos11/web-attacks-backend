@@ -55,7 +55,7 @@ app.post('/login', login);
 app.get('/user-data', userData);
 
 app.get('/posts', getAllPosts);
-app.post('/posts', adminMiddleware, addPost);
+app.post('/posts', addPost);
 app.delete('/posts/:id', adminMiddleware, deletePost);
 
 // module.exports = app
