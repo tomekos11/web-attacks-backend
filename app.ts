@@ -26,11 +26,13 @@ app.use(cookieParser())
 
 app.use(
   cors({
-    // origin: 'https://localhost:9000',
     origin: 'http://localhost:9000',
+    // origin: ['http://localhost:9000', 'http://localhost:3000'],
     credentials: true,
   }),
 )
+
+app.use(express.urlencoded({ extended: true }));
 
 app.use(
   // secure: true,

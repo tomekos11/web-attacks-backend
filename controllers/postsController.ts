@@ -19,6 +19,12 @@ export const addPost = async (req, res) => {
     return res.status(403).json({ error: 'Brak sesji użytkownika' })
   }
 
+  console.log(req.params);
+
+  console.log(req.body);
+
+  console.log(req.query);
+
   const { title, content } = req.body
   if (!title || !content) {
     return res.status(400).json({ error: 'Tytuł i treść są wymagane' })
