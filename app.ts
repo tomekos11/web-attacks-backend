@@ -58,5 +58,3 @@ app.get('/posts', getAllPosts);
 app.post('/posts', addPost);
 app.delete('/posts/:id', adminMiddleware, deletePost);
 
-// module.exports = app
-
