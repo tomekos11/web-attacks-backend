@@ -38,6 +38,41 @@ export const login = async (req, res) => {
   }
 };
 
+export const loginUnsafe = async (req, res) => {
+  const { username, password } = req.body
+
+  try {
+
+    const query = `
+      SELECT * FROM users
+      WHERE username = '${username}' AND password = '${password}'
+    `
+
+    db.get(query, (err, user) => {
+      if (err) {
+        console.error('Błąd SQL:', err)
+        return res.status(500).json({ error: 'Błąd serwera' })
+      }
+
+      if (!user) {
+        console.error('Nie znaleziono użytkownika', { username })
+        return res.status(401).json({ error: 'Nieprawidłowe dane logowania' })
+      }
+
+      // Zalogowano pomyślnie
+      req.session.userId = user.id
+      req.session.username = user.username
+      req.session.userNumber = user.userNumber
+      req.session.isAdmin = user.role === 'admin'
+
+      res.json({ message: 'Zalogowano pomyślnie', user })
+    })
+  } catch (err) {
+    console.error('Błąd podczas niebezpiecznego logowania:', err)
+    res.status(500).json({ error: 'Błąd serwera' })
+  }
+}
+
 export const userData = (req, res) => {
   res.status(200).json({ 
     username: req.session.username,

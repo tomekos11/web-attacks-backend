@@ -18,6 +18,8 @@ import { login, userData } from 'controllers/authController';
 import { addPost, deletePost, getAllPosts } from 'controllers/postsController';
 import { adminMiddleware } from 'middlewares/adminMiddleware';
 
+import { loginUnsafe } from 'controllers/authController.js';
+
 
 export const app = express()
 
@@ -60,3 +62,5 @@ app.get('/posts', getAllPosts);
 app.post('/posts', addPost);
 app.delete('/posts/:id', adminMiddleware, deletePost);
 
+//sql injection
+app.post('/login-unsafe', loginUnsafe);
