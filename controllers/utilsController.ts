@@ -10,7 +10,6 @@ import { exec } from 'child_process'
         console.error(`Błąd: ${error}`)
       return res.status(500).send(`Błąd:\n${stderr}`)
     }
-    console.log(stdout)
     res.send(`Wynik:\n${stdout}`)
   })
 }
