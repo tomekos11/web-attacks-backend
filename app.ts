@@ -19,7 +19,7 @@ import { addPost, deletePost, getAllPosts } from 'controllers/postsController';
 import { adminMiddleware } from 'middlewares/adminMiddleware';
 
 import { loginUnsafe } from 'controllers/authController.js';
-import { pingHost } from 'controllers/utilsController.js';
+import { getFile, pingHost } from 'controllers/utilsController.js';
 
 
 export const app = express()
@@ -67,3 +67,4 @@ app.delete('/posts/:id', adminMiddleware, deletePost);
 app.post('/login-unsafe', loginUnsafe);
 
 app.get('/ping', pingHost)
+app.get('/file', getFile)
