@@ -57,7 +57,7 @@ export const initDb = async () => {
     ]);
   }
 
-  await db.exec(`CREATE TABLE IF NOT EXISTS security (
+  await db.exec(`CREATE TABLE IF NOT EXISTS security_settings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE,
     isActive INTEGER NOT NULL DEFAULT 0
@@ -65,7 +65,7 @@ export const initDb = async () => {
   
   for (const attack of webAttacks) {
     await db.run(
-      `INSERT OR IGNORE INTO security (name) VALUES (?)`,
+      `INSERT OR IGNORE INTO security_settings (name) VALUES (?)`,
       [attack]
     );
   }

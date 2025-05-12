@@ -95,18 +95,20 @@ interface Security {
 }
 
 app.post('/security', async (req, res) => {
-  const securities = req.body.securities;
+  const securityOptions = req.body.securityOptions;
 
-  if (!Array.isArray(securities)) {
-    return res.status(400).json({ error: 'Invalid payload: securities must be an array' });
+  console.log(securityOptions);
+
+  if (!Array.isArray(securityOptions)) {
+    return res.status(400).json({ error: 'Invalid payload: securityOptions must be an array' });
   }
 
   try {
-    for (const { name, isActive } of securities) {
+    for (const { name, isActive } of securityOptions) {
       await setSecurity(name, isActive);
     }
 
-    res.status(200).json({ success: true });
+    getSecurity(req, res);
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false });

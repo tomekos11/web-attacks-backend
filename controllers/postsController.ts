@@ -1,6 +1,3 @@
-// const postService = require('../services/postService.ts')
-// const webSocketManager = require('../services/webSocketManager.ts')
-
 import { postService } from "services/postService.js"
 import { webSocketManager } from "services/webSocketManager.js"
 
@@ -18,12 +15,6 @@ export const addPost = async (req, res) => {
   if (!req.session.userId) {
     return res.status(403).json({ error: 'Brak sesji użytkownika' })
   }
-
-  console.log(req.params);
-
-  console.log(req.body);
-
-  console.log(req.query);
 
   const { title, content } = req.body
   if (!title || !content) {
@@ -61,9 +52,3 @@ export const deletePost = async (req, res) => {
     res.status(500).json({ error: 'Błąd usuwania posta' })
   }
 }
-
-// module.exports = {
-//   getAllPosts,
-//   addPost,
-//   deletePost,
-// }
