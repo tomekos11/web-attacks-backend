@@ -52,6 +52,41 @@ export const initDb = async () => {
     ]);
   }
 
+  await db.exec(`CREATE TABLE IF NOT EXISTS secrets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER NOT NULL,
+    creditCard TEXT,
+    pin TEXT,
+    secretNote TEXT,
+    FOREIGN KEY (userId) REFERENCES users(id)
+  )`);
+  
+  // Dodaj dane dla użytkownika 1 (admin) i 2 (np. test)
+  const user1 = await db.get('SELECT id FROM users WHERE username = ?', ['admin']);
+  const user2 = await db.get('SELECT id FROM users WHERE username = ?', ['test']);
+  
+  if (!user2) {
+    const hashedPassword = await bcrypt.hash('1234', 10);
+    const result = await db.run('INSERT INTO users (username, password, role, userNumber) VALUES (?, ?, ?, ?)', [
+      'test',
+      hashedPassword,
+      'user',
+      '2',
+    ]);
+    user2 = { id: result.lastID };
+  }
+  
+  await db.run(
+    `INSERT OR IGNORE INTO secrets (userId, creditCard, pin, secretNote) VALUES (?, ?, ?, ?)`,
+    [user1.id, '4111 1111 1111 1111', '1234', 'Adminowy sekret']
+  );
+  
+  await db.run(
+    `INSERT OR IGNORE INTO secrets (userId, creditCard, pin, secretNote) VALUES (?, ?, ?, ?)`,
+    [user2.id, '5500 0000 0000 0004', '4321', 'Użytkownik testowy']
+  );
+
+  
   return db;
 };
 

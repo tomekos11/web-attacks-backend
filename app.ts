@@ -1,13 +1,3 @@
-// const express = require('express')
-// const session = require('express-session')
-// const SQLiteStore = require('connect-sqlite3')(session)
-// const cors = require('cors')
-// const cookieParser = require('cookie-parser')
-// const sessionMiddleware = require('./middlewares/sessionsMiddleware.ts')
-// const adminMiddleware = require('./middlewares/adminMiddleware.ts')
-// const authController = require('./controllers/authController.ts')
-// const postsController = require('./controllers/postsController.ts')
-
 import { sessionMiddleware } from 'middlewares/sessionsMiddleware'
 import session from 'express-session';
 import connectSqlite3 from 'connect-sqlite3';
@@ -18,6 +8,9 @@ import { login, userData } from 'controllers/authController';
 import { addPost, deletePost, getAllPosts } from 'controllers/postsController';
 import { adminMiddleware } from 'middlewares/adminMiddleware';
 import csurf from 'csurf'
+
+import { loginUnsafe } from 'controllers/authController.js';
+import { getFile, pingHost } from 'controllers/utilsController.js';
 
 
 export const app = express()
@@ -44,16 +37,11 @@ const csrfProtection = csurf({
 
 app.use((req, res, next) => {
   if (csrfEnabled) {
-    // Jeśli CSRF jest włączone, zastosuj ochronę
     csrfProtection(req, res, next);
   } else {
-    // Jeśli CSRF jest wyłączone, pomiń weryfikację
     next();
   }
 });
-
-// CSRF
-// app.use(csurf({ cookie: true, value: (req) => req.headers['x-csrf-token'] }));
 
 app.use(
   // secure: true,
@@ -81,6 +69,11 @@ app.get('/posts', getAllPosts);
 app.post('/posts', addPost);
 app.delete('/posts/:id', adminMiddleware, deletePost);
 
+//sql injection
+app.post('/login-unsafe', loginUnsafe);
+
+app.get('/ping', pingHost)
+app.get('/file', getFile)
 
 app.post('/toggle-csrf', adminMiddleware, (req, res) => {
   csrfEnabled = !csrfEnabled;
