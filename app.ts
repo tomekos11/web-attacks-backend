@@ -17,6 +17,7 @@ import express from 'express'
 import { login, userData } from 'controllers/authController';
 import { addPost, deletePost, getAllPosts } from 'controllers/postsController';
 import { adminMiddleware } from 'middlewares/adminMiddleware';
+import csurf from 'csurf'
 
 
 export const app = express()
@@ -33,6 +34,26 @@ app.use(
 )
 
 app.use(express.urlencoded({ extended: true }));
+
+let csrfEnabled = true;
+
+const csrfProtection = csurf({
+  cookie: true,
+  value: (req) => req.headers['x-csrf-token']
+});
+
+app.use((req, res, next) => {
+  if (csrfEnabled) {
+    // Jeśli CSRF jest włączone, zastosuj ochronę
+    csrfProtection(req, res, next);
+  } else {
+    // Jeśli CSRF jest wyłączone, pomiń weryfikację
+    next();
+  }
+});
+
+// CSRF
+// app.use(csurf({ cookie: true, value: (req) => req.headers['x-csrf-token'] }));
 
 app.use(
   // secure: true,
@@ -60,3 +81,12 @@ app.get('/posts', getAllPosts);
 app.post('/posts', addPost);
 app.delete('/posts/:id', adminMiddleware, deletePost);
 
+
+app.post('/toggle-csrf', adminMiddleware, (req, res) => {
+  csrfEnabled = !csrfEnabled;
+  res.send(`CSRF: ${csrfEnabled ? 'włączony' : 'wyłączony'}`);
+});
+
+app.get('/csrf-token', csrfProtection, (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
