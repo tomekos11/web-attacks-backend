@@ -2,16 +2,6 @@ import { initDb } from "./config/db.js"
 import { webSocketManager } from "./services/webSocketManager.js"
 import http from 'http'
 import { app } from './app.js'
-// import fs from 'fs'
-
-// const http = require('http')
-// const app = require('./app.ts')
-// const fs = require('fs')
-
-// const server = https.createServer({
-//     key: fs.readFileSync('./cert/key.pem'),
-//     cert: fs.readFileSync('./cert/cert.pem')
-// }, app)
 
 const server = http.createServer(app)
 

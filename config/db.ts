@@ -1,12 +1,17 @@
-// const sqlite3 = require('sqlite3');
-// const { open } = require('sqlite');
-// const bcrypt = require('bcryptjs');
-
 import sqlite3 from 'sqlite3'
 import { open } from 'sqlite'
 import bcrypt from 'bcryptjs'
 
 let db;
+
+export const webAttacks = [
+  'csrf',
+  'clickjacking',
+  'sql-injection',
+  'xss',
+  'command-injection',
+  'path-traversal'
+];
 
 export const initDb = async () => {
   if (db) return db;
@@ -17,11 +22,11 @@ export const initDb = async () => {
   });
 
   // Tabela sesji (opcjonalnie - connect-sqlite3 też tworzy)
-  await db.exec(`CREATE TABLE IF NOT EXISTS sessions (
-    sid TEXT PRIMARY KEY,
-    sess TEXT NOT NULL,
-    expire INTEGER NOT NULL
-  )`);
+  // await db.exec(`CREATE TABLE IF NOT EXISTS sessions (
+  //   sid TEXT PRIMARY KEY,
+  //   sess TEXT NOT NULL,
+  //   expire INTEGER NOT NULL
+  // )`);
 
   await db.exec(`CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,6 +57,19 @@ export const initDb = async () => {
     ]);
   }
 
+  await db.exec(`CREATE TABLE IF NOT EXISTS security (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE,
+    isActive INTEGER NOT NULL DEFAULT 0
+  )`);
+  
+  for (const attack of webAttacks) {
+    await db.run(
+      `INSERT OR IGNORE INTO security (name) VALUES (?)`,
+      [attack]
+    );
+  }
+
   await db.exec(`CREATE TABLE IF NOT EXISTS secrets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     userId INTEGER NOT NULL,
@@ -63,7 +81,7 @@ export const initDb = async () => {
   
   // Dodaj dane dla użytkownika 1 (admin) i 2 (np. test)
   const user1 = await db.get('SELECT id FROM users WHERE username = ?', ['admin']);
-  const user2 = await db.get('SELECT id FROM users WHERE username = ?', ['test']);
+  let user2 = await db.get('SELECT id FROM users WHERE username = ?', ['test']);
   
   if (!user2) {
     const hashedPassword = await bcrypt.hash('1234', 10);
@@ -89,5 +107,3 @@ export const initDb = async () => {
   
   return db;
 };
-
-// module.exports = initDb;

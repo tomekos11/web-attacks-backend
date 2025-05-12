@@ -1,6 +1,3 @@
-// const crypto = require('crypto')
-// const dbService = require('../services/dbService.ts')
-
 import crypto from 'crypto'
 import { dbService } from '../services/dbService.js'
 
@@ -57,5 +54,3 @@ export const sessionMiddleware = async (req, res, next) => {
 
   return next();
 };
-
-// module.exports = sessionMiddleware

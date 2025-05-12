@@ -1,7 +1,3 @@
-// services/userService.ts
-// const bcrypt = require('bcryptjs')
-// const db = require('./dbService.ts') // Upewnij się, że importujesz odpowiednią instancję bazy danych
-
 import bcrypt from 'bcryptjs'
 import { dbService } from './dbService'
 
@@ -19,8 +15,8 @@ class UserService {
     await dbService.run('INSERT INTO users (username, password, role, userNumber) VALUES (?, ?, ?, ?)', [
       username,
       hashedPassword,
-      'user', // Domyślna rola to 'user'
-      '1', // Możesz dodać logikę przypisania odpowiedniego numeru użytkownika
+      'user',
+      '1',
     ])
   }
 
@@ -62,10 +58,8 @@ class UserService {
       throw new Error('Użytkownik nie istnieje')
     }
 
-    return user.role === 'admin' // Zwraca true, jeśli użytkownik jest administratorem
+    return user.role === 'admin'
   }
 }
-
-// module.exports = UserService
 
 export const userService = UserService

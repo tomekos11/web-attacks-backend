@@ -11,6 +11,9 @@ import csurf from 'csurf'
 
 import { loginUnsafe } from 'controllers/authController.js';
 import { getFile, pingHost } from 'controllers/utilsController.js';
+import path from 'path';
+import { getSecurity, setSecurity } from 'services/securityService.js';
+import { webAttacks } from 'config/db.js';
 
 
 export const app = express()
@@ -47,7 +50,7 @@ app.use(
   // secure: true,
   // sameSite: 'None',
   session({
-    store: new connectSqlite3(session)({ db: 'database.db', dir: './' }),
+    store: new connectSqlite3(session)({ db: 'database.db', dir: path.resolve('./') }),
     secret: 'supersecretkey',
     resave: false,
     saveUninitialized: false,
@@ -83,3 +86,29 @@ app.post('/toggle-csrf', adminMiddleware, (req, res) => {
 app.get('/csrf-token', csrfProtection, (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
+
+app.get('/security', getSecurity)
+
+interface Security {
+  name: string;
+  isActive: boolean;
+}
+
+app.post('/security', async (req, res) => {
+  const securities = req.body.securities;
+
+  if (!Array.isArray(securities)) {
+    return res.status(400).json({ error: 'Invalid payload: securities must be an array' });
+  }
+
+  try {
+    for (const { name, isActive } of securities) {
+      await setSecurity(name, isActive);
+    }
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+})
