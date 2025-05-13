@@ -1,9 +1,6 @@
-// const bcrypt = require('bcryptjs')
-// const userService = require('../services/userService.ts')
-
 import bcrypt from 'bcryptjs'
 import { userService } from 'services/userService.js';
-import { sqlInjectionEnabled } from './securityController.js';
+import { sqlInjectionSecurityEnabled } from './securityController.js';
 
 export const loginSafe = async (req, res) => {
   const { username, password } = req.body;
@@ -48,7 +45,6 @@ export const loginUnsafe = async (req, res) => {
       WHERE username = '${username}' AND password = '${password}'
     `
 
-    console.log(query)
     db.get(query, (err, user) => {
       // Najpierw sprawdzamy, czy wystąpił błąd SQL
       if (err) {
@@ -75,7 +71,7 @@ export const loginUnsafe = async (req, res) => {
 }
 
 export const login = async (req, res) => {
-  if(sqlInjectionEnabled) {
+  if(sqlInjectionSecurityEnabled) {
     loginSafe(req, res)
     return;
   }
@@ -90,9 +86,3 @@ export const userData = (req, res) => {
     isAdmin: req.session.isAdmin
   })
 }
-
-// module.exports = {
-//   login,
-//   userData,
-// }
-

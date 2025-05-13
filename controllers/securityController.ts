@@ -1,13 +1,11 @@
 import { getSecurity, setSecurity } from "services/securityService.js";
 
-export let csrfEnabled = false;
-export let xssEnabled = false;
-export let clickjackingEnabled = false;
-export let sqlInjectionEnabled = false;
-export let commandInjectionEnabled = false;
-export let pathTraversalEnabled = false;
-
-
+export let csrfSecurityEnabled = true;
+export let xssSecurityEnabled = true;
+export let clickjackingSecurityEnabled = true;
+export let sqlInjectionSecurityEnabled = true;
+export let commandInjectionSecurityEnabled = true;
+export let pathTraversalSecurityEnabled = true;
 
 export const setSecurities = async (req, res) => {
     const securityOptions = req.body.securityOptions;
@@ -21,12 +19,12 @@ export const setSecurities = async (req, res) => {
             await setSecurity(name, isActive);
 
             switch(name) {
-                case 'csrf': csrfEnabled = !!isActive; break;
-                case 'xss': xssEnabled = !!isActive; break;
-                case 'clickjacking': clickjackingEnabled = !!isActive; break;
-                case 'sql-injection': sqlInjectionEnabled = !!isActive; break;
-                case 'command-injection': commandInjectionEnabled = !!isActive; break;
-                case 'path-traversal': pathTraversalEnabled = !!isActive; break;
+                case 'csrf': csrfSecurityEnabled = !!isActive; break;
+                case 'xss': xssSecurityEnabled = !!isActive; break;
+                case 'clickjacking': clickjackingSecurityEnabled = !!isActive; break;
+                case 'sql-injection': sqlInjectionSecurityEnabled = !!isActive; break;
+                case 'command-injection': commandInjectionSecurityEnabled = !!isActive; break;
+                case 'path-traversal': pathTraversalSecurityEnabled = !!isActive; break;
             }
         }
 
@@ -48,12 +46,12 @@ export const initEnabled = async () => {
 
     for (const { name, isActive } of securityOptions) {
         switch(name) {
-            case 'csrf': csrfEnabled = !!isActive; break;
-            case 'xss': xssEnabled = !!isActive; break;
-            case 'clickjacking': clickjackingEnabled = !!isActive; break;
-            case 'sql-injection': sqlInjectionEnabled = !!isActive; break;
-            case 'command-injection': commandInjectionEnabled = !!isActive; break;
-            case 'path-traversal': pathTraversalEnabled = !!isActive; break;
+            case 'csrf': csrfSecurityEnabled = !!isActive; break;
+            case 'xss': xssSecurityEnabled = !!isActive; break;
+            case 'clickjacking': clickjackingSecurityEnabled = !!isActive; break;
+            case 'sql-injection': sqlInjectionSecurityEnabled = !!isActive; break;
+            case 'command-injection': commandInjectionSecurityEnabled = !!isActive; break;
+            case 'path-traversal': pathTraversalSecurityEnabled = !!isActive; break;
         }
     }
 
@@ -61,12 +59,12 @@ export const initEnabled = async () => {
 
 export const checkEnabled = (req, res) => {
     const enabledOptions = {
-        csrfEnabled,
-        xssEnabled,
-        clickjackingEnabled,
-        sqlInjectionEnabled,
-        pathTraversalEnabled,
-        commandInjectionEnabled
+        csrfSecurityEnabled,
+        xssSecurityEnabled,
+        clickjackingSecurityEnabled,
+        sqlInjectionSecurityEnabled,
+        pathTraversalSecurityEnabled,
+        commandInjectionSecurityEnabled
     }
 
     return res.json(enabledOptions) 

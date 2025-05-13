@@ -12,7 +12,7 @@ import csurf from 'csurf'
 import { loginUnsafe } from 'controllers/authController.js';
 import { getFile, pingHost } from 'controllers/utilsController.js';
 import path from 'path';
-import { checkEnabled, csrfEnabled, getSecurities, setSecurities } from 'controllers/securityController.js';
+import { checkEnabled, csrfSecurityEnabled, getSecurities, setSecurities } from 'controllers/securityController.js';
 
 
 export const app = express()
@@ -35,7 +35,7 @@ const csrfProtection = csurf({
 });
 
 app.use((req, res, next) => {
-  if (csrfEnabled) {
+  if (csrfSecurityEnabled) {
     csrfProtection(req, res, next);
   } else {
     next();
