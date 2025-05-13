@@ -54,6 +54,7 @@ export const loginUnsafe = async (req, res) => {
 
       // Jeśli nie było błędu, ale użytkownika nie znaleziono
       if (!user) {
+        console.error('blad z sql injection');
         return res.status(401).json({ error: 'Nieprawidłowe dane logowania' })
       }
 
@@ -71,12 +72,15 @@ export const loginUnsafe = async (req, res) => {
 }
 
 export const login = async (req, res) => {
-  if(sqlInjectionSecurityEnabled) {
-    loginSafe(req, res)
-    return;
-  }
+  // if(sqlInjectionSecurityEnabled) {
+  //   loginSafe(req, res)
+  //   return;
+  // }
   
-  loginUnsafe(req, res)
+  // loginUnsafe(req, res)
+
+  // temporary
+  loginSafe(req, res)
 }
 
 export const userData = (req, res) => {
