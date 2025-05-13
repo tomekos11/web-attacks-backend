@@ -3,31 +3,54 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
- export const pingHost = (req, res) => {
-  const name = req.query.name || 'localhost'
+import { pathTraversalSecurityEnabled, commandInjectionSecurityEnabled } from 'controllers/securityController.js';
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+
+export const pingHost = (req, res) => {
+  let name = req.query.name || 'localhost'
+  if (commandInjectionSecurityEnabled) {
+    const safePattern = /^[a-zA-Z0-9\.\-]+$/
+    if (!safePattern.test(name)) {
+      return res.status(400).send('Nieprawidłowy host.')
+    }
+  }
+
   const command = `cmd /c "ping -n 1 ${name}"`
 
   exec(command, (error, stdout, stderr) => {
     if (error) {
-        console.log(error, stdout, stderr)
-        console.error(`Błąd: ${error}`)
+      console.error(`Błąd: ${error}`)
       return res.status(500).send(`Błąd:\n${stderr}`)
     }
     res.send(`Wynik:\n${stdout}`)
   })
 }
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 export const getFile = (req, res) => {
-  const file = req.query.file;
-  const filePath = path.join(__dirname, '../files', file)
+  const file = req.query.file
 
-console.log(filePath)
+  if (!file) {
+    return res.status(400).send('Brak nazwy pliku.')
+  }
+
+  const baseDir = path.join(__dirname, '../files')
+
+  const filePath = path.join(baseDir, file)
+
+  if (pathTraversalSecurityEnabled) {
+    const normalizedPath = path.normalize(filePath)
+
+    if (!normalizedPath.startsWith(baseDir)) {
+      return res.status(400).send('Nieprawidłowa ścieżka.')
+    }
+  }
+
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
-      return res.status(404).send('Plik nie istnieje');
+      return res.status(404).send('Plik nie istnieje')
     }
-    res.send(data);
-  });
-};
+    res.send(data)
+  })
+}
