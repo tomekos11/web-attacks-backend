@@ -3,8 +3,9 @@
 
 import bcrypt from 'bcryptjs'
 import { userService } from 'services/userService.js';
+import { sqlInjectionEnabled } from './securityController.js';
 
-export const login = async (req, res) => {
+export const loginSafe = async (req, res) => {
   const { username, password } = req.body;
 
   try {
@@ -73,7 +74,14 @@ export const loginUnsafe = async (req, res) => {
   }
 }
 
-
+export const login = async (req, res) => {
+  if(sqlInjectionEnabled) {
+    loginSafe(req, res)
+    return;
+  }
+  
+  loginUnsafe(req, res)
+}
 
 export const userData = (req, res) => {
   res.status(200).json({ 

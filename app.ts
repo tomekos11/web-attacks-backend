@@ -12,8 +12,7 @@ import csurf from 'csurf'
 import { loginUnsafe } from 'controllers/authController.js';
 import { getFile, pingHost } from 'controllers/utilsController.js';
 import path from 'path';
-import { getSecurity, setSecurity } from 'services/securityService.js';
-import { webAttacks } from 'config/db.js';
+import { checkEnabled, csrfEnabled, getSecurities, setSecurities } from 'controllers/securityController.js';
 
 
 export const app = express()
@@ -24,14 +23,11 @@ app.use(cookieParser())
 app.use(
   cors({
     origin: 'http://localhost:9000',
-    // origin: ['http://localhost:9000', 'http://localhost:3000'],
     credentials: true,
   }),
 )
 
 app.use(express.urlencoded({ extended: true }));
-
-let csrfEnabled = true;
 
 const csrfProtection = csurf({
   cookie: true,
@@ -78,39 +74,11 @@ app.post('/login-unsafe', loginUnsafe);
 app.get('/ping', pingHost)
 app.get('/file', getFile)
 
-app.post('/toggle-csrf', adminMiddleware, (req, res) => {
-  csrfEnabled = !csrfEnabled;
-  res.send(`CSRF: ${csrfEnabled ? 'włączony' : 'wyłączony'}`);
-});
-
 app.get('/csrf-token', csrfProtection, (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
 
-app.get('/security', getSecurity)
+app.get('/security', getSecurities)
+app.post('/security', setSecurities)
 
-interface Security {
-  name: string;
-  isActive: boolean;
-}
-
-app.post('/security', async (req, res) => {
-  const securityOptions = req.body.securityOptions;
-
-  console.log(securityOptions);
-
-  if (!Array.isArray(securityOptions)) {
-    return res.status(400).json({ error: 'Invalid payload: securityOptions must be an array' });
-  }
-
-  try {
-    for (const { name, isActive } of securityOptions) {
-      await setSecurity(name, isActive);
-    }
-
-    getSecurity(req, res);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
-  }
-})
+app.get('/check-enabled', checkEnabled)

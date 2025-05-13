@@ -1,12 +1,12 @@
 import { dbService } from "./dbService.js"
 
 
-export const getSecurity = async (req, res) => {
+export const getSecurity = async () => {
     try {
       const db = await dbService;
       console.log(2)
       const settings = await db.all('SELECT * FROM security_settings');
-      return res.json(settings)
+      return settings
     } catch (err) {
       console.error('DB error in getSecurity:', err);
       return [];
