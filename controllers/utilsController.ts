@@ -54,3 +54,35 @@ export const getFile = (req, res) => {
     res.send(data)
   })
 }
+
+export const uploadFile = (req, res) => {
+  const { filename, content } = req.body;
+
+  if (!filename || !content) {
+    return res.status(400).send('Brakuje danych.');
+  }
+
+  const baseDir = path.join(__dirname, '../files');
+  const filePath = path.join(baseDir, filename);
+
+  if (pathTraversalSecurityEnabled) {
+    const normalizedPath = path.normalize(filePath);
+
+    // Blokuj path traversal
+    if (!normalizedPath.startsWith(baseDir)) {
+      return res.status(400).send('Nieprawidłowa ścieżka.');
+    }
+
+    // Blokuj nadpisywanie istniejących plików
+    if (fs.existsSync(normalizedPath)) {
+      return res.status(400).send('Plik już istnieje – nie można nadpisać.');
+    }
+  }
+
+  fs.writeFile(filePath, content, 'utf8', (err) => {
+    if (err) {
+      return res.status(500).send('Błąd zapisu pliku.');
+    }
+    res.send('Plik zapisany.');
+  });
+};

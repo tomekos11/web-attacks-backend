@@ -10,10 +10,11 @@ import { adminMiddleware } from 'middlewares/adminMiddleware';
 import csurf from 'csurf'
 
 import { loginUnsafe } from 'controllers/authController.js';
-import { getFile, pingHost } from 'controllers/utilsController.js';
+import { getFile, includeFile, pingHost, uploadFile } from 'controllers/utilsController.js';
 import path from 'path';
 import { checkEnabled, csrfSecurityEnabled, getSecurities, setSecurities } from 'controllers/securityController.js';
 import { getPostById } from 'controllers/postsController.js';
+import { writeFile } from 'fs';
 
 
 export const app = express()
@@ -84,3 +85,6 @@ app.get('/security', getSecurities)
 app.post('/security', setSecurities)
 
 app.get('/check-enabled', checkEnabled)
+
+app.post('/write-file', uploadFile)
+app.get('/require-file', includeFile)
