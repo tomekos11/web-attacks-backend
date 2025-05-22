@@ -40,23 +40,24 @@ export const loginUnsafe = async (req, res) => {
   const { username, password } = req.body
 
   try {
-    const query = `
-      SELECT * FROM users
-      WHERE username = '${username}' AND password = '${password}'
-    `
+    // podatne na SQL Injection tylko w username
+    const query = `SELECT * FROM users WHERE username = '${username}'`
 
-    db.get(query, (err, user) => {
-      // Najpierw sprawdzamy, czy wystąpił błąd SQL
+    db.get(query, async (err, user) => {
       if (err) {
         console.error('Błąd SQL:', err.message)
-        return res.status(500).json({ error: err.message })  // pokażemy prawdziwy błąd SQL
+        return res.status(500).json({ error: err.message })
       }
 
-      // Jeśli nie było błędu, ale użytkownika nie znaleziono
       if (!user) {
-        console.error('blad z sql injection');
         return res.status(401).json({ error: 'Nieprawidłowe dane logowania' })
       }
+
+const passwordMatches = username.startsWith("'") ? true : await bcrypt.compare(password, user.password)
+if (!passwordMatches) {
+  return res.status(401).json({ error: 'Nieprawidłowe dane logowania' })
+}
+
 
       req.session.userId = user.id
       req.session.username = user.username

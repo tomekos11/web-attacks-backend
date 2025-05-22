@@ -13,6 +13,7 @@ import { loginUnsafe } from 'controllers/authController.js';
 import { getFile, pingHost } from 'controllers/utilsController.js';
 import path from 'path';
 import { checkEnabled, csrfSecurityEnabled, getSecurities, setSecurities } from 'controllers/securityController.js';
+import { getPostById } from 'controllers/postsController.js';
 
 
 export const app = express()
@@ -66,6 +67,7 @@ app.get('/user-data', userData);
 
 app.get('/posts', getAllPosts);
 app.post('/posts', addPost);
+app.get('/post', getPostById);
 app.delete('/posts/:id', adminMiddleware, deletePost);
 
 //sql injection

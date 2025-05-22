@@ -1,5 +1,6 @@
 import { postService } from "services/postService.js"
 import { webSocketManager } from "services/webSocketManager.js"
+import { sqlInjectionSecurityEnabled } from 'controllers/securityController.js';
 
 export const getAllPosts = async (req, res) => {
   try {
@@ -50,5 +51,50 @@ export const deletePost = async (req, res) => {
     res.json({ message: 'Post został usunięty' })
   } catch (err) {
     res.status(500).json({ error: 'Błąd usuwania posta' })
+  }
+}
+
+
+export const getPostById = async (req, res) => {
+  const { id } = req.query
+
+  try {
+    if (sqlInjectionSecurityEnabled) {
+      // ✅ BEZPIECZNA WERSJA – zapytanie z parametrem
+      const query = `SELECT * FROM posts WHERE id = ?;`
+      console.log('secure query', query, 'params:', id)
+
+      db.get(query, [id], (err, row) => {
+        if (err) {
+          console.error(err)
+          return res.status(500).json({ error: err.message })
+        }
+
+        if (!row) {
+          return res.status(404).json({ error: 'Post nie został znaleziony' })
+        }
+
+        res.json(row)
+      })
+    } else {
+      // ❌ NIEBEZPIECZNA WERSJA – podatna na SQL Injection
+      const query = `SELECT * FROM posts WHERE id = ${id};`
+      console.log('vulnerable query', query)
+
+      db.get(query, (err, row) => {
+        if (err) {
+          console.error(err)
+        res.status(500).json({ error: 'Błąd serwera' })
+        }
+
+        if (!row) {
+          return res.status(404).json({ error: 'Post nie został znaleziony' })
+        }
+
+        res.json(row)
+      })
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Błąd serwera' })
   }
 }
