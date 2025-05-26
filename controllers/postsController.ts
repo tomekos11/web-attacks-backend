@@ -74,7 +74,7 @@ export const getPostById = async (req, res) => {
           return res.status(404).json({ error: 'Post nie został znaleziony' })
         }
 
-        res.json(row)
+        return res.json(row)
       })
     } else {
       // ❌ NIEBEZPIECZNA WERSJA – podatna na SQL Injection
@@ -84,17 +84,17 @@ export const getPostById = async (req, res) => {
       db.get(query, (err, row) => {
         if (err) {
           console.error(err)
-        res.status(500).json({ error: 'Błąd serwera' })
+          return res.status(500).json({ error: 'Błąd serwera' })
         }
 
         if (!row) {
           return res.status(404).json({ error: 'Post nie został znaleziony' })
         }
 
-        res.json(row)
+        return res.json(row)
       })
     }
   } catch (err) {
-    res.status(500).json({ error: 'Błąd serwera' })
+    return res.status(500).json({ error: 'Błąd serwera' })
   }
 }
