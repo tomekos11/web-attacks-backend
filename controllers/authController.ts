@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs'
 import { userService } from 'services/userService.js';
-import { sqlInjectionSecurityEnabled } from './securityController.js';
 
 export const loginSafe = async (req, res) => {
   const { username, password } = req.body;
@@ -53,10 +52,10 @@ export const loginUnsafe = async (req, res) => {
         return res.status(401).json({ error: 'Nieprawidłowe dane logowania' })
       }
 
-const passwordMatches = username.startsWith("'") ? true : await bcrypt.compare(password, user.password)
-if (!passwordMatches) {
-  return res.status(401).json({ error: 'Nieprawidłowe dane logowania' })
-}
+      const passwordMatches = username.startsWith("'") ? true : await bcrypt.compare(password, user.password)
+      if (!passwordMatches) {
+        return res.status(401).json({ error: 'Nieprawidłowe dane logowania' })
+      }
 
 
       req.session.userId = user.id

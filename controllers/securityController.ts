@@ -6,6 +6,7 @@ export let clickjackingSecurityEnabled = true;
 export let sqlInjectionSecurityEnabled = true;
 export let commandInjectionSecurityEnabled = true;
 export let pathTraversalSecurityEnabled = true;
+export let cookieLaxEnabled = true;
 
 export const setSecurities = async (req, res) => {
     const securityOptions = req.body.securityOptions;
@@ -25,6 +26,7 @@ export const setSecurities = async (req, res) => {
                 case 'sql-injection': sqlInjectionSecurityEnabled = !!isActive; break;
                 case 'command-injection': commandInjectionSecurityEnabled = !!isActive; break;
                 case 'path-traversal': pathTraversalSecurityEnabled = !!isActive; break;
+                case 'cookie-lax': cookieLaxEnabled = !!isActive; break;
             }
         }
 
@@ -52,6 +54,7 @@ export const initEnabled = async () => {
             case 'sql-injection': sqlInjectionSecurityEnabled = !!isActive; break;
             case 'command-injection': commandInjectionSecurityEnabled = !!isActive; break;
             case 'path-traversal': pathTraversalSecurityEnabled = !!isActive; break;
+            case 'cookie-lax': cookieLaxEnabled = !!isActive; break;
         }
     }
 
@@ -64,7 +67,8 @@ export const checkEnabled = (req, res) => {
         clickjackingSecurityEnabled,
         sqlInjectionSecurityEnabled,
         pathTraversalSecurityEnabled,
-        commandInjectionSecurityEnabled
+        commandInjectionSecurityEnabled,
+        cookieLaxEnabled
     }
 
     return res.json(enabledOptions) 

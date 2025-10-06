@@ -10,7 +10,8 @@ export const webAttacks = [
   'sql-injection',
   'xss',
   'command-injection',
-  'path-traversal'
+  'path-traversal',
+  'cookie-lax'
 ];
 
 export const initDb = async () => {

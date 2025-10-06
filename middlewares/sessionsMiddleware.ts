@@ -17,7 +17,7 @@ export const sessionMiddleware = async (req, res, next) => {
   if (session.userId) {
     return next();
   }
-
+  
   if (session.userId && !session.userId.startsWith('guest_')) {
 
     const user = await dbService.get('SELECT * FROM users WHERE id = ?', [session.userId]);
@@ -46,6 +46,8 @@ export const sessionMiddleware = async (req, res, next) => {
 
     return next();
   }
+
+  console.log('dziala??');
 
   session.userId = `guest_${Math.random().toString(36).substr(2, 9)}`;
   session.username = generateRandomName();
