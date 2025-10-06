@@ -16,7 +16,7 @@ const start = async () => {
   await initEnabled();
 
   server.listen(5000, () => {
-    console.log('Serwer działa na http://localhost:5000')
+    console.log('Serwer działa na http://localhost:5000 (backend.wa.local)')
   })
 
   webSocketManager.init(server);

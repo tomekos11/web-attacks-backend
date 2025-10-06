@@ -22,7 +22,7 @@ app.use(cookieParser())
 
 app.use(
   cors({
-    origin: ['http://localhost:9000', 'http://localhost:9100', 'http://frontend-1.wa.local'],
+    origin: ['http://localhost:9000', 'http://localhost:9100', 'http://frontend.wa.local'],
     credentials: true,
   }),
 )
