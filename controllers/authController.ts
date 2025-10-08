@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs'
-import { userService } from 'services/userService.js';
+import { userService } from 'services/userService';
 
 export const loginSafe = async (req, res) => {
   const { username, password } = req.body;
@@ -84,6 +84,12 @@ export const login = async (req, res) => {
 }
 
 export const userData = (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.status(400).json({
+      error: 'Niepoprawna domena lub brak sesji'
+    });
+  }
+  
   res.status(200).json({ 
     username: req.session.username,
     userNumber: req.session.userNumber,

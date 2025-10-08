@@ -1,6 +1,4 @@
-// const dbService = require('./dbService.ts')
-import { getPostById } from 'controllers/postsController.js';
-import { dbService } from './dbService.js';
+import { dbService } from './dbService';
 
 const getAllPosts = async () => {
   const db = await dbService
@@ -40,12 +38,6 @@ const deletePost = async (id) => {
   await db.run('DELETE FROM posts WHERE id = ?', [id])
   return true
 }
-
-// module.exports = {
-//   getAllPosts,
-//   createPost,
-//   deletePost,
-// }
 
 export const postService = {
   getAllPosts,

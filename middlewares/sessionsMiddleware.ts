@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { dbService } from '../services/dbService.js'
+import { dbService } from '../services/dbService'
 
 // 🛠 Generowanie losowego imienia
 function generateRandomName() {

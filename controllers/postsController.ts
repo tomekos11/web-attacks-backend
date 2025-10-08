@@ -1,6 +1,6 @@
 import { postService } from "services/postService.js"
 import { webSocketManager } from "services/webSocketManager.js"
-import { sqlInjectionSecurityEnabled } from 'controllers/securityController.js';
+import { sqlInjectionSecurityEnabled } from 'controllers/securityController';
 
 export const getAllPosts = async (req, res) => {
   try {

@@ -6,7 +6,12 @@ export let clickjackingSecurityEnabled = true;
 export let sqlInjectionSecurityEnabled = true;
 export let commandInjectionSecurityEnabled = true;
 export let pathTraversalSecurityEnabled = true;
+
+export let cookieHttpOnlyEnabled = true;
 export let cookieLaxEnabled = true;
+export let cookieSecureEnabled = true;
+
+export let httpsEnabled = true;
 
 export const setSecurities = async (req, res) => {
     const securityOptions = req.body.securityOptions;
@@ -27,6 +32,9 @@ export const setSecurities = async (req, res) => {
                 case 'command-injection': commandInjectionSecurityEnabled = !!isActive; break;
                 case 'path-traversal': pathTraversalSecurityEnabled = !!isActive; break;
                 case 'cookie-lax': cookieLaxEnabled = !!isActive; break;
+                case 'cookie-secure': cookieSecureEnabled = !!isActive; break;
+                case 'cookie-http-only': cookieHttpOnlyEnabled = !!isActive; break;
+                // case 'https': httpsEnabled = !!isActive; break;
             }
         }
 
@@ -55,12 +63,15 @@ export const initEnabled = async () => {
             case 'command-injection': commandInjectionSecurityEnabled = !!isActive; break;
             case 'path-traversal': pathTraversalSecurityEnabled = !!isActive; break;
             case 'cookie-lax': cookieLaxEnabled = !!isActive; break;
+            case 'cookie-secure': cookieSecureEnabled = !!isActive; break;
+            case 'cookie-http-only': cookieHttpOnlyEnabled = !!isActive; break;
+            // case 'https': httpsEnabled = !!isActive; break;
         }
     }
 
 }
 
-export const checkEnabled = (req, res) => {
+export const checkEnabledSecurity = (req, res) => {
     const enabledOptions = {
         csrfSecurityEnabled,
         xssSecurityEnabled,
@@ -68,7 +79,10 @@ export const checkEnabled = (req, res) => {
         sqlInjectionSecurityEnabled,
         pathTraversalSecurityEnabled,
         commandInjectionSecurityEnabled,
-        cookieLaxEnabled
+        cookieLaxEnabled,
+        cookieSecureEnabled,
+        cookieHttpOnlyEnabled,
+        httpsEnabled,
     }
 
     return res.json(enabledOptions) 

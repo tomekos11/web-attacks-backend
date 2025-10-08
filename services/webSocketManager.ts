@@ -44,8 +44,23 @@ class WebSocketManager {
       }
     });
   }
-}
 
-// module.exports = new WebSocketManager();
+  reset() {
+    if (this.wss) {
+      this.wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN || client.readyState === WebSocket.CONNECTING) {
+          client.close(1001, 'Server restart'); // kod 1001 = going away
+        }
+      });
+
+      // Zamykamy serwer WebSocket
+      this.wss.close(() => {
+        console.log('WebSocket został zamknięty.');
+      });
+
+      this.wss = null;
+    }
+  }
+}
 
 export const webSocketManager = new WebSocketManager();

@@ -3,7 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { pathTraversalSecurityEnabled, commandInjectionSecurityEnabled } from 'controllers/securityController.js';
+import { pathTraversalSecurityEnabled, commandInjectionSecurityEnabled } from 'controllers/securityController';
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 

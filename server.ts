@@ -1,10 +1,6 @@
 import { initDb } from "./config/db.js"
-import { webSocketManager } from "./services/webSocketManager.js"
-import http from 'http'
-import { app } from './app.js'
-import { initEnabled } from "controllers/securityController.js"
-
-const server = http.createServer(app)
+import { httpsEnabled, initEnabled } from "controllers/securityController.js"
+import { startServer } from "services/server.js";
 
 const start = async () => {
   initDb().then((db) => {
@@ -15,11 +11,7 @@ const start = async () => {
 
   await initEnabled();
 
-  server.listen(5000, () => {
-    console.log('Serwer działa na http://localhost:5000 (backend.wa.local)')
-  })
-
-  webSocketManager.init(server);
+  startServer(httpsEnabled);
 }
 
 start()
