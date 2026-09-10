@@ -10,6 +10,7 @@ import { getFile, pingHost, uploadFile } from 'controllers/utilsController';
 import { checkEnabledSecurity, getSecurities, setSecurities } from 'controllers/securityController';
 import { getPostById } from 'controllers/postsController';
 import { corsMiddleware } from 'middlewares/cors';
+import { clickjackingMiddleware } from 'middlewares/clickjacking';
 import { csrfMiddleware, csrfProtectionMiddleware, sendCsrfToken } from 'middlewares/csrf';
 
 export const app = express()
@@ -17,6 +18,7 @@ export const app = express()
 app.use(express.json())
 app.use(cookieParser())
 
+app.use(clickjackingMiddleware);
 app.use(corsMiddleware);
 
 app.use(express.urlencoded({ extended: true }));
