@@ -3,10 +3,27 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { pathTraversalSecurityEnabled, commandInjectionSecurityEnabled } from 'controllers/securityController';
+import { commandInjectionSecurityEnabled } from 'controllers/securityController';
+import { shouldBlockOverwrite, validateFilePath, getOverwriteBlockedMessage } from 'utils/pathTraversalValidation.js';
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+const FILES_DIR = path.join(__dirname, '../files')
+
+const IMAGE_MIME_TYPES: Record<string, string> = {
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.svg': 'image/svg+xml',
+}
+
+const getMimeType = (filePath: string): string | null => {
+  const extension = path.extname(filePath).toLowerCase()
+  return IMAGE_MIME_TYPES[extension] ?? null
+}
 
 export const pingHost = (req, res) => {
   let name = req.query.name || 'localhost'
@@ -35,19 +52,27 @@ export const getFile = (req, res) => {
     return res.status(400).send('Brak nazwy pliku.')
   }
 
-  const baseDir = path.join(__dirname, '../files')
+  const validation = validateFilePath(file, FILES_DIR)
 
-  const filePath = path.join(baseDir, file)
-
-  if (pathTraversalSecurityEnabled) {
-    const normalizedPath = path.normalize(filePath)
-
-    if (!normalizedPath.startsWith(baseDir)) {
-      return res.status(400).send('Nieprawidłowa ścieżka.')
-    }
+  if (!validation.valid) {
+    return res.status(400).send(validation.error)
   }
 
-  fs.readFile(filePath, 'utf8', (err, data) => {
+  const mimeType = getMimeType(validation.resolvedPath)
+
+  if (mimeType) {
+    fs.readFile(validation.resolvedPath, (err, data) => {
+      if (err) {
+        return res.status(404).send('Plik nie istnieje')
+      }
+
+      res.setHeader('Content-Type', mimeType)
+      res.send(data)
+    })
+    return
+  }
+
+  fs.readFile(validation.resolvedPath, 'utf8', (err, data) => {
     if (err) {
       return res.status(404).send('Plik nie istnieje')
     }
@@ -62,24 +87,17 @@ export const uploadFile = (req, res) => {
     return res.status(400).send('Brakuje danych.');
   }
 
-  const baseDir = path.join(__dirname, '../files');
-  const filePath = path.join(baseDir, filename);
+  const validation = validateFilePath(filename, FILES_DIR);
 
-  if (pathTraversalSecurityEnabled) {
-    const normalizedPath = path.normalize(filePath);
-
-    // Blokuj path traversal
-    if (!normalizedPath.startsWith(baseDir)) {
-      return res.status(400).send('Nieprawidłowa ścieżka.');
-    }
-
-    // Blokuj nadpisywanie istniejących plików
-    if (fs.existsSync(normalizedPath)) {
-      return res.status(400).send('Plik już istnieje – nie można nadpisać.');
-    }
+  if (!validation.valid) {
+    return res.status(400).send(validation.error);
   }
 
-  fs.writeFile(filePath, content, 'utf8', (err) => {
+  if (shouldBlockOverwrite(validation.resolvedPath)) {
+    return res.status(400).send(getOverwriteBlockedMessage());
+  }
+
+  fs.writeFile(validation.resolvedPath, content, 'utf8', (err) => {
     if (err) {
       return res.status(500).send('Błąd zapisu pliku.');
     }
