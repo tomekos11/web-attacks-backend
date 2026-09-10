@@ -27,8 +27,8 @@ function launchNewServer(useHttps: boolean) {
 
     try {
         options = {
-            key: fs.readFileSync('../certs/server.key'),
-            cert: fs.readFileSync('../certs/server.cert'),
+            key: fs.readFileSync('./certs/server.key'),
+            cert: fs.readFileSync('./certs/server.cert'),
         };
 
     } catch (error) {
