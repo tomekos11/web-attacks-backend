@@ -1,0 +1,24 @@
+import { initDb, webAttacks } from '../config/db.js'
+
+const db = await initDb()
+
+for (const { name, description } of webAttacks.filter((item) => item.name.startsWith('sql-injection'))) {
+  await db.run('INSERT OR IGNORE INTO security_settings (name, description) VALUES (?, ?)', [name, description])
+
+  const groupRow = await db.get('SELECT id FROM security_groups WHERE name = ?', ['sql-injection'])
+  const settingRow = await db.get('SELECT id FROM security_settings WHERE name = ?', [name])
+
+  if (groupRow && settingRow) {
+    await db.run(
+      'INSERT OR IGNORE INTO security_groups_settings (securityGroupId, securitySettingId) VALUES (?, ?)',
+      [groupRow.id, settingRow.id],
+    )
+  }
+}
+
+const rows = await db.all(
+  "SELECT name, isActive FROM security_settings WHERE name LIKE 'sql-injection%' ORDER BY name",
+)
+
+console.log(rows)
+await db.close()

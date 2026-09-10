@@ -1,6 +1,7 @@
 import { postService } from "services/postService.js"
 import { webSocketManager } from "services/webSocketManager.js"
-import { sqlInjectionSecurityEnabled } from 'controllers/securityController';
+import { fetchPostById } from 'services/sqlQueryService.js'
+import { validateNumericId } from 'utils/sqlInjectionValidation.js'
 
 export const getAllPosts = async (req, res) => {
   try {
@@ -58,43 +59,24 @@ export const deletePost = async (req, res) => {
 export const getPostById = async (req, res) => {
   const { id } = req.query
 
-  try {
-    if (sqlInjectionSecurityEnabled) {
-      // ✅ BEZPIECZNA WERSJA – zapytanie z parametrem
-      const query = `SELECT * FROM posts WHERE id = ?;`
-      console.log('secure query', query, 'params:', id)
-
-      db.get(query, [id], (err, row) => {
-        if (err) {
-          console.error(err)
-          return res.status(500).json({ error: err.message })
-        }
-
-        if (!row) {
-          return res.status(404).json({ error: 'Post nie został znaleziony' })
-        }
-
-        return res.json(row)
-      })
-    } else {
-      // ❌ NIEBEZPIECZNA WERSJA – podatna na SQL Injection
-      const query = `SELECT * FROM posts WHERE id = ${id};`
-      console.log('vulnerable query', query)
-
-      db.get(query, (err, row) => {
-        if (err) {
-          console.error(err)
-          return res.status(500).json({ error: 'Błąd serwera' })
-        }
-
-        if (!row) {
-          return res.status(404).json({ error: 'Post nie został znaleziony' })
-        }
-
-        return res.json(row)
-      })
-    }
-  } catch (err) {
-    return res.status(500).json({ error: 'Błąd serwera' })
+  const validation = validateNumericId(id)
+  if (validation.valid === false) {
+    return res.status(400).json({ error: validation.error, blockedBy: validation.blockedBy })
   }
+
+  const result = await fetchPostById(String(id))
+
+  if (result.ok === false) {
+    return res.status(result.status).json({
+      error: result.error,
+      ...(result.blockedBy ? { blockedBy: result.blockedBy } : {}),
+      ...(result.leakedError ? { sqlError: true } : {}),
+    })
+  }
+
+  if (!result.row) {
+    return res.status(404).json({ error: 'Post nie został znaleziony', found: false })
+  }
+
+  return res.json(result.row)
 }

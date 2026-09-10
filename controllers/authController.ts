@@ -1,5 +1,7 @@
 import bcrypt from 'bcryptjs'
-import { userService } from 'services/userService';
+import { userService } from 'services/userService.js'
+import { fetchUserForLogin } from 'services/sqlQueryService.js'
+import { validatePassword, validateUsername } from 'utils/sqlInjectionValidation.js'
 
 export const loginSafe = async (req, res) => {
   const { username, password } = req.body;
@@ -7,27 +9,23 @@ export const loginSafe = async (req, res) => {
   try {
     console.log("Trwa próba logowania...", { username });
 
-    // Pobranie użytkownika
     const user = await userService.getUserByUsername(username);
     if (!user) {
       console.error('Nie znaleziono użytkownika', { username });
       return res.status(401).json({ error: 'Nieprawidłowe dane logowania' });
     }
 
-    // Porównanie hasła
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       console.error('Nieprawidłowe hasło dla użytkownika', { username });
       return res.status(401).json({ error: 'Nieprawidłowe dane logowania' });
     }
 
-    // Sesja
     req.session.userId = user.id;
     req.session.username = user.username;
     req.session.userNumber = user.userNumber;
     req.session.isAdmin = user.role === 'admin';
 
-    // Odpowiedź
     res.json({ message: 'Zalogowano pomyślnie', user });
   } catch (err) {
     console.error('Błąd podczas logowania:', err);
@@ -38,49 +36,64 @@ export const loginSafe = async (req, res) => {
 export const loginUnsafe = async (req, res) => {
   const { username, password } = req.body
 
+  const usernameValidation = validateUsername(username)
+  if (usernameValidation.valid === false) {
+    return res.status(400).json({ error: usernameValidation.error, blockedBy: usernameValidation.blockedBy })
+  }
+
+  const passwordValidation = validatePassword(password)
+  if (passwordValidation.valid === false) {
+    return res.status(400).json({ error: passwordValidation.error, blockedBy: passwordValidation.blockedBy })
+  }
+
   try {
-    // podatne na SQL Injection tylko w username
-    const query = `SELECT * FROM users WHERE username = '${username}'`
+    const result = await fetchUserForLogin(String(username), String(password ?? ''))
 
-    db.get(query, async (err, user) => {
-      if (err) {
-        console.error('Błąd SQL:', err.message)
-        return res.status(500).json({ error: err.message })
-      }
+    if (result.ok === false) {
+      return res.status(result.status).json({
+        error: result.error,
+        ...(result.blockedBy ? { blockedBy: result.blockedBy } : {}),
+      })
+    }
 
-      if (!user) {
-        return res.status(401).json({ error: 'Nieprawidłowe dane logowania' })
-      }
+    const user = result.row
 
-      const passwordMatches = username.startsWith("'") ? true : await bcrypt.compare(password, user.password)
-      if (!passwordMatches) {
-        return res.status(401).json({ error: 'Nieprawidłowe dane logowania' })
-      }
+    if (!user) {
+      return res.status(401).json({ error: 'Nieprawidłowe dane logowania' })
+    }
 
-
+    if (result.skipPasswordCheck) {
       req.session.userId = user.id
       req.session.username = user.username
       req.session.userNumber = user.userNumber
       req.session.isAdmin = user.role === 'admin'
 
-      res.json({ message: 'Zalogowano pomyślnie', user })
-    })
+      return res.json({ message: 'Zalogowano pomyślnie (SQL Injection)', user })
+    }
+
+    const passwordMatches = await bcrypt.compare(password, user.password as string)
+
+    if (!passwordMatches) {
+      return res.status(401).json({
+        error:
+          'Nieprawidłowe hasło. To nie jest blokada zabezpieczeń — zapytanie SQL znalazło użytkownika, ale bcrypt.compare() odrzuciło hasło.',
+      })
+    }
+
+    req.session.userId = user.id
+    req.session.username = user.username
+    req.session.userNumber = user.userNumber
+    req.session.isAdmin = user.role === 'admin'
+
+    res.json({ message: 'Zalogowano pomyślnie', user })
   } catch (err) {
-    console.error('Błąd podczas logowania:', err.message)
-    return res.status(500).json({ error: err.message })
+    console.error('Błąd podczas logowania:', (err as Error).message)
+    return res.status(500).json({ error: (err as Error).message })
   }
 }
 
 export const login = async (req, res) => {
-  // if(sqlInjectionSecurityEnabled) {
-  //   loginSafe(req, res)
-  //   return;
-  // }
-  
-  // loginUnsafe(req, res)
-
-  // temporary
-  loginSafe(req, res)
+  loginUnsafe(req, res)
 }
 
 export const userData = (req, res) => {
