@@ -45,15 +45,19 @@ export const sessionMiddleware = (req: Request, res: Response, next: NextFunctio
     return next();
   }
 
+  const sameSite = cookieLaxEnabled ? 'lax' : 'none';
+  // SameSite=None wymaga Secure — inaczej przeglądarka odrzuca ciasteczko
+  const secure = sameSite === 'none' ? true : cookieSecureEnabled;
+
   const sessionInstance = session({
     store: new SqliteStore({ db: 'database.db', dir: path.resolve('./') }),
     secret: 'supersecretkey',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: cookieSecureEnabled,
+      secure,
       httpOnly: cookieHttpOnlyEnabled,
-      sameSite: cookieLaxEnabled ? 'lax' : 'none',
+      sameSite,
       domain: matchedDomain,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 dni
     }
