@@ -51,9 +51,16 @@ export const webAttacks: webAttack[] = [
   },
 
   {
+    name: 'x-frame-options',
+    groups: ['clickjacking'],
+    description:
+      'Ustawia nagłówek X-Frame-Options: DENY, co blokuje osadzanie strony w iframe (starszy mechanizm ochrony przed clickjackingiem).',
+  },
+  {
     name: 'csp-frame-ancestors',
     groups: ['clickjacking'],
-    description: 'Zapobiega osadzaniu strony w ramkach (iframe) na innych domenach, co chroni przed atakami clickjacking.',
+    description:
+      'Ustawia CSP frame-ancestors \'none\', co blokuje osadzanie strony w iframe na innych domenach (nowszy mechanizm ochrony przed clickjackingiem).',
   },
 
   {
@@ -80,7 +87,82 @@ export const webAttacks: webAttack[] = [
   {
     name: 'cors',
     groups: ['api-security'],
-    description: 'Włącza i konfiguruje CORS (Cross-Origin Resource Sharing), co pozwala kontrolować, które domeny mogą uzyskiwać dostęp do zasobów API.',
+    description:
+      'Włączone: nagłówki CORS tylko dla originów z listy (m.in. frontend.wa.local:9100). Wyłączone: nagłówki dla dowolnego originu (tryb bez restrykcji).',
+  },
+  {
+    name: 'origin-allowlist',
+    groups: ['api-security'],
+    description:
+      'Odrzuca żądania z nieznanego nagłówka Origin odpowiedzią HTTP 403 (blokada po stronie serwera, niezależna od samego braku nagłówków CORS).',
+  },
+
+  {
+    name: 'path-traversal-normalize',
+    groups: ['path-traversal'],
+    description:
+      'Walidacja ścieżki przez path.normalize() oraz sprawdzenie prefiksu katalogu bazowego (podstawowa ochrona).',
+  },
+  {
+    name: 'path-traversal-resolve',
+    groups: ['path-traversal'],
+    description:
+      'Walidacja ścieżki przez path.resolve() z wymuszeniem separatora po katalogu bazowym (ochrona przed atakami typu prefix).',
+  },
+  {
+    name: 'path-traversal-whitelist',
+    groups: ['path-traversal'],
+    description:
+      'Dozwolone są wyłącznie nazwy plików złożone z liter, cyfr, kropki, podkreślenia i myślnika.',
+  },
+  {
+    name: 'path-traversal-blacklist',
+    groups: ['path-traversal'],
+    description:
+      'Odrzuca nazwy plików zawierające podejrzane sekwencje: .., ukośniki, backslashe oraz zakodowane warianty (%2e, %2f, %5c).',
+  },
+  {
+    name: 'path-traversal-realpath',
+    groups: ['path-traversal'],
+    description:
+      'Walidacja kanonicznej ścieżki przez fs.realpath() – odporność na symlinki i złożone sekwencje ../.',
+  },
+  {
+    name: 'path-traversal-block-overwrite',
+    groups: ['path-traversal'],
+    description:
+      'Blokuje nadpisywanie istniejących plików przy operacji zapisu (niezależna warstwa obrony).',
+  },
+
+  {
+    name: 'sql-injection-parameterized',
+    groups: ['sql-injection'],
+    description:
+      'Parametryzacja zapytań SQL (placeholdery ?) zamiast konkatenacji stringów – podstawowa ochrona przed SQL Injection.',
+  },
+  {
+    name: 'sql-injection-input-validation',
+    groups: ['sql-injection'],
+    description:
+      'Walidacja danych wejściowych: ID posta tylko cyfry, login i hasło regex (litery/cyfry/@/./_/-), limit długości inputu.',
+  },
+  {
+    name: 'sql-injection-least-privilege',
+    groups: ['sql-injection'],
+    description:
+      '',
+  },
+  {
+    name: 'sql-injection-error-handling',
+    groups: ['sql-injection'],
+    description:
+      'Obsługa błędów bez wycieków: zamiast komunikatu SQLite zwracany jest generyczny błąd serwera (brak error-based SQLi).',
+  },
+  {
+    name: 'sql-injection-orm',
+    groups: ['sql-injection'],
+    description:
+      'Użycie ORM (Drizzle) zamiast surowego SQL – automatyczna parametryzacja i bezpieczne mapowanie wyników.',
   },
 
 ]
